@@ -1,10 +1,12 @@
 package com.example.recipes.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 
 @Data
+@NoArgsConstructor
 public class Recipe {
     private String title;
     private int timeOfCooking;
