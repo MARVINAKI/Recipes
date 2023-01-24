@@ -17,10 +17,9 @@ public class RecipesFileServiceImpl
     private String recDataFileName;
 
     @Override
-    public boolean writeToFile(String json) {
+    public void writeToFile(String json) {
         try {
             Files.writeString(Path.of(dataFilePath, recDataFileName), json);
-            return true;
         } catch (IOException ex) {
             ex.printStackTrace();
             throw new RuntimeException(ex);

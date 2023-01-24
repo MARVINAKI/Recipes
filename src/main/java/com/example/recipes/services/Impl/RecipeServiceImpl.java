@@ -8,19 +8,25 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 @Service
 public class RecipeServiceImpl
         implements RecipeService {
+
+    @Value("${pathToDataFile}")
+    private String dataFilePath;
+    @Value("${nameOfRecipeDataFile}")
+    private String recDataFileName;
     private final FilesService filesService;
     private Map<Integer, Recipe> recipes = new LinkedHashMap<>();
     private final IngredientService ingService;
-
-    private static int id = 1;
 
     public RecipeServiceImpl(@Qualifier("recipesFileServiceImpl") FilesService filesService,
                              IngredientService ingService) {
@@ -30,8 +36,10 @@ public class RecipeServiceImpl
 
     @Override
     public final void addRecipe(Recipe recipe) {
-        this.recipes.put(id++, recipe);
-        writeToFile();
+        if (!recipes.containsValue(recipe)) {
+            this.recipes.put(recipes.size() + 1, recipe);
+            writeToFile();
+        }
     }
 
     @Override
@@ -75,6 +83,7 @@ public class RecipeServiceImpl
 
     @PostConstruct
     public void maker() {
+        checkOrFillMap();
         readFromFile();
     }
 
@@ -96,6 +105,13 @@ public class RecipeServiceImpl
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();
             throw new RuntimeException(ex);
+        }
+    }
+
+    private void checkOrFillMap() {
+        if (!Files.exists(Path.of(dataFilePath, recDataFileName))) {
+            recipes.put(0, new Recipe());
+            writeToFile();
         }
     }
 }
