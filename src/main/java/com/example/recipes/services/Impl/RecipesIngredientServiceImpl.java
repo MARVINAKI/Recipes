@@ -37,8 +37,13 @@ public class RecipesIngredientServiceImpl
     @Override
     public void addIngredient(Ingredient ingredient) {
         if (!ingredients.containsValue(ingredient)) {
-            ingredients.put(ingredients.size() + 1, ingredient);
-            writeToFile();
+            for (int id = 0; ; id++) {
+                if (!ingredients.containsKey(id)) {
+                    ingredients.put(id, ingredient);
+                    writeToFile();
+                    break;
+                }
+            }
         }
     }
 

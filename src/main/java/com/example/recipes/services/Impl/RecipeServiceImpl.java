@@ -37,8 +37,13 @@ public class RecipeServiceImpl
     @Override
     public final void addRecipe(Recipe recipe) {
         if (!recipes.containsValue(recipe)) {
-            this.recipes.put(recipes.size() + 1, recipe);
-            writeToFile();
+            for (int id = 0; ; id++) {
+                if (!recipes.containsKey(id)) {
+                    recipes.put(id, recipe);
+                    writeToFile();
+                    break;
+                }
+            }
         }
     }
 
