@@ -17,10 +17,9 @@ public class IngredientsFileServiceImpl
     private String ingDataFileName;
 
     @Override
-    public boolean writeToFile(String json) {
+    public void writeToFile(String json) {
         try {
             Files.writeString(Path.of(dataFilePath, ingDataFileName), json);
-            return true;
         } catch (IOException ex) {
             ex.printStackTrace();
             throw new RuntimeException();

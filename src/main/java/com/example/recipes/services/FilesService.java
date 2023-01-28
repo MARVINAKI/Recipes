@@ -1,7 +1,7 @@
 package com.example.recipes.services;
 
 public interface FilesService {
-    boolean writeToFile(String json);
+    void writeToFile(String json);
 
     String readFromFile();
 

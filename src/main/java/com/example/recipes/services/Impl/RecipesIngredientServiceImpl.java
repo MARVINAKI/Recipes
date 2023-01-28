@@ -7,9 +7,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +20,11 @@ import java.util.Map;
 @Service
 public class RecipesIngredientServiceImpl
         implements IngredientService {
+
+    @Value("${pathToDataFile}")
+    private String dataFilePath;
+    @Value("${nameOfIngredientDataFile}")
+    private String ingDataFileName;
     private final FilesService filesService;
 
     public RecipesIngredientServiceImpl(@Qualifier("ingredientsFileServiceImpl") FilesService filesService) {
@@ -25,13 +33,17 @@ public class RecipesIngredientServiceImpl
 
 
     private static Map<Integer, Ingredient> ingredients = new LinkedHashMap<>();
-    private int id = 1;
 
     @Override
     public void addIngredient(Ingredient ingredient) {
         if (!ingredients.containsValue(ingredient)) {
-            ingredients.put(id++, ingredient);
-            writeToFile();
+            for (int id = 0; ; id++) {
+                if (!ingredients.containsKey(id)) {
+                    ingredients.put(id, ingredient);
+                    writeToFile();
+                    break;
+                }
+            }
         }
     }
 
@@ -63,6 +75,7 @@ public class RecipesIngredientServiceImpl
 
     @PostConstruct
     private void maker() {
+        checkOrFillMap();
         readFromFile();
     }
 
@@ -84,6 +97,13 @@ public class RecipesIngredientServiceImpl
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();
             throw new RuntimeException(ex);
+        }
+    }
+
+    private void checkOrFillMap() {
+        if (!Files.exists(Path.of(dataFilePath, ingDataFileName))) {
+            ingredients.put(0, new Ingredient());
+            writeToFile();
         }
     }
 }
