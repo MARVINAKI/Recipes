@@ -4,6 +4,7 @@ import com.example.recipes.services.FilesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,5 +47,19 @@ public class IngredientsFileServiceImpl
             ex.printStackTrace();
             throw new RuntimeException(ex);
         }
+    }
+
+    @Override
+    public Path createTempFile(String suffix) {
+        try {
+            return Files.createTempFile(Path.of(dataFilePath), "tempFile", suffix);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    @Override
+    public File getDataFile() {
+        return new File(dataFilePath + "/" + ingDataFileName);
     }
 }
