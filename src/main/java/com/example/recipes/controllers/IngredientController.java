@@ -23,9 +23,9 @@ public class IngredientController {
     @PostMapping
     @Operation(summary = "Создание ингредиентов",
             description = "Создание одного ингредиента и добавление в базу данных")
-    public Ingredient addIng(@RequestBody Ingredient ingredient) {
+    public ResponseEntity<Ingredient> addIng(@RequestBody Ingredient ingredient) {
         ingredientService.addIngredient(ingredient);
-        return ingredient;
+        return ResponseEntity.ok(ingredient);
     }
 
     @GetMapping("/{id}")
@@ -33,14 +33,25 @@ public class IngredientController {
             description = "Для вывода нужного ингредиента нужно знать его id")
     public ResponseEntity<Ingredient> getRecipe(@PathVariable int id) {
         Ingredient ingredient = ingredientService.getIngredient(id);
-        return ingredient == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(ingredient);
+        return ingredient == null ?
+                ResponseEntity
+                        .notFound()
+                        .header("Description", "No ingredient in the database")
+                        .build()
+                : ResponseEntity.ok(ingredient);
     }
 
     @GetMapping("/print")
     @Operation(summary = "Поиск ингредиентов",
             description = "Выводит полный список ингредиентов")
-    public Collection<Ingredient> getAllIngredients() {
-        return ingredientService.getAllIngredients();
+    public ResponseEntity<Collection<Ingredient>> getAllIngredients() {
+        int size = ingredientService.getAllIngredients().size();
+        return size == 0 ?
+                ResponseEntity
+                        .noContent()
+                        .header("Description", "The DataBase of Ingredients is Empty")
+                        .build()
+                : ResponseEntity.ok(ingredientService.getAllIngredients());
     }
 
     @PutMapping("/{id}")
@@ -50,13 +61,25 @@ public class IngredientController {
     public ResponseEntity<Ingredient> editRecipe(@PathVariable int id,
                                                  @RequestBody Ingredient newIngredient) {
         Ingredient ingredient = ingredientService.editIngredient(id, newIngredient);
-        return ingredient == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(ingredient);
+        return ingredient == null ?
+                ResponseEntity
+                        .notFound()
+                        .header("error", "Ingredient by ID not found")
+                        .build()
+                : ResponseEntity.ok(ingredient);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Удаление ингредиента",
             description = "Полное удаление ингредиента из базы (выбор объекта по id)")
     public ResponseEntity<Void> deleteRecipe(@PathVariable int id) {
-        return ingredientService.deleteIngredient(id) ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        return ingredientService.deleteIngredient(id) ?
+                ResponseEntity
+                        .ok()
+                        .build()
+                : ResponseEntity
+                .notFound()
+                .header("error", "Ingredient by ID not found")
+                .build();
     }
 }
